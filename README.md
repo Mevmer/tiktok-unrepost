@@ -8,6 +8,21 @@
 
 ---
 
+## 📱 Для мобильных телефонов
+
+**Используешь Android, iPhone, iPad?** 📲
+
+👉 **[Прочитай подробный гайд MOBILE-GUIDE.md](MOBILE-GUIDE.md)** ← пошаговые инструкции для всех браузеров!
+
+Там описано как установить букмарклет на:
+- ✅ Chrome (Android)
+- ✅ Firefox (Android)
+- ✅ Edge (Android)
+- ✅ Brave (Android)
+- ⚠️ Safari (iOS) — не работает, но есть решение
+
+---
+
 ## Установка
 
 ### 🌟 Вариант 1: Букмарклет (работает везде!)
@@ -102,6 +117,23 @@ TikTok иногда меняет вёрстку сайта. Скрипт ище�
 **TikTok Unrepost** removes **all of your TikTok reposts** in bulk, right in your browser: no passwords, no third-party services, no subscriptions.
 
 TikTok has no "remove all reposts" button, so you normally have to undo them one by one. This script does exactly that for you: it opens every video in your Reposts tab and clicks "Remove repost".
+
+---
+
+## 📱 For Mobile Phones
+
+**Using Android, iPhone, iPad?** 📲
+
+👉 **[Read the detailed guide MOBILE-GUIDE.md](MOBILE-GUIDE.md)** ← step-by-step instructions for all browsers!
+
+It covers how to install the bookmarklet on:
+- ✅ Chrome (Android)
+- ✅ Firefox (Android)
+- ✅ Edge (Android)
+- ✅ Brave (Android)
+- ⚠️ Safari (iOS) — doesn't work, but there's a solution
+
+---
 
 ### Install
 

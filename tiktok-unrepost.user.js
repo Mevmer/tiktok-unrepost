@@ -2,7 +2,7 @@
 // @name         TikTok Unrepost — удалить все репосты
 // @name:en      TikTok Unrepost — remove all reposts
 // @namespace    https://github.com/Mevmer/tiktok-unrepost
-// @version      4.0.1
+// @version      4.0.2
 // @description  Массово снимает все ваши репосты в веб-версии TikTok. Кнопка появляется на странице вашего профиля.
 // @description:en Bulk-remove all of your reposts on TikTok web. A button appears on your profile page.
 // @author       Mevmer
@@ -44,7 +44,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '4.0.1';
+  const VERSION = '4.0.2';
   const TAG = '[unrepost]';
 
   if (window.tiktokUnrepost && window.tiktokUnrepost.state && window.tiktokUnrepost.state.running) {
@@ -85,6 +85,8 @@
   const ADD_RE = /^\s*(repost|репост)\s*$/i;
   // Метка под описанием видео
   const BADGE_RE = /(вы\s+сделали\s+репост|you\s+reposted|ви\s+зробили\s+репост)/i;
+  // Кнопка «Изменить профиль» — есть только в своём профиле
+  const EDIT_RE = /(edit\s+profile|изменить\s+профиль|редагувати\s+профіль|editar\s+perfil|profil\s+bearbeiten|modifier\s+le\s+profil|modifica\s+profilo|edytuj\s+profil|profili\s+düzenle)/i;
   // Кнопка подтверждения, если TikTok вдруг спросит
   const CONFIRM_RE = /^(remove|delete|confirm|ok|yes|убрать|удалить|подтвердить|ок|да)$/i;
 
@@ -92,6 +94,7 @@
   // сработает следующий.
   const SEL = {
     navProfile: ['a[data-e2e="nav-profile"]', '[data-e2e="nav-profile"] a', '[data-e2e="nav-profile"]'],
+    editProfile: ['[data-e2e="edit-profile-entrance"]', '[data-e2e="edit-profile"]'],
     videosTab: ['[data-e2e="videos-tab"]'],
     repostIcon: [
       '[data-e2e="video-share-repost"]',
@@ -206,17 +209,55 @@
   }
 
   // ─────────────────────────── навигация ───────────────────────────
-  function ownPath() {
+  // Ники с кириллицей, пробелами и т.п. браузер и TikTok кодируют по-разному
+  // («/@злой» и «/@%D0%B7…», «%d0» и «%D0», абсолютная и относительная ссылка),
+  // поэтому пути сравниваем только после приведения к одному виду.
+  function normPath(href) {
+    if (!href) return null;
+    let p;
+    try { p = new URL(href, location.href).pathname; } catch (e) { p = String(href).split(/[?#]/)[0]; }
+    try { p = decodeURIComponent(p); } catch (e) { /* битая последовательность — сравниваем как есть */ }
+    return p.normalize('NFC').replace(/\s+/g, ' ').replace(/\/+$/, '').toLowerCase();
+  }
+
+  // Ник вошедшего пользователя из данных, которые TikTok кладёт в страницу.
+  let handleCache = null;
+  function ownHandle() {
+    if (handleCache) return handleCache;
+    try {
+      const data = JSON.parse(document.getElementById('__UNIVERSAL_DATA_FOR_REHYDRATION__').textContent);
+      const user = data.__DEFAULT_SCOPE__['webapp.app-context'].user;
+      handleCache = (user && user.uniqueId) || null;
+    } catch (e) { /* данных нет — обойдёмся ссылкой из меню */ }
+    return handleCache;
+  }
+
+  function ownPaths() {
     const a = first(SEL.navProfile);
     const href = a && (a.getAttribute('href') || (a.querySelector('a') || {}).getAttribute?.('href'));
-    return href ? href.split('?')[0].replace(/\/$/, '') : null;
+    const id = ownHandle();
+    return [href, id && '/@' + id].map(normPath).filter(Boolean);
   }
 
   const inViewer = () => !!first(SEL.close) && /\/(video|photo)\//.test(location.pathname);
 
+  // Кнопка «Изменить профиль» есть только в своём профиле — запасной признак,
+  // если путь всё-таки не совпал.
+  function editProfileVisible() {
+    return !!first(SEL.editProfile) || all('button').some(b => visible(b) && EDIT_RE.test(labelOf(b)));
+  }
+
   function onOwnProfile() {
-    const p = ownPath();
-    return !!p && decodeURIComponent(location.pathname.replace(/\/$/, '')) === decodeURIComponent(p) && !inViewer();
+    if (inViewer() || !/^\/@[^/]+\/?$/.test(location.pathname)) return false;
+    return ownPaths().includes(normPath(location.href)) || editProfileVisible();
+  }
+
+  // Ссылка на свой профиль: из меню TikTok, а если её нет — любая на странице.
+  function profileLink() {
+    const nav = first(SEL.navProfile);
+    if (nav) return nav;
+    const own = ownPaths();
+    return own.length ? all('a[href*="/@"]').find(a => visible(a) && own.includes(normPath(a.getAttribute('href')))) : null;
   }
 
   async function closeViewer() {
@@ -239,7 +280,7 @@
     await closeViewer();
 
     if (!onOwnProfile()) {
-      const nav = first(SEL.navProfile);
+      const nav = profileLink();
       if (!nav) return { error: 'Не нашёл ссылку на ваш профиль. Войдите в аккаунт на tiktok.com и запустите снова.' };
       await clickAndWait(nav, onOwnProfile, 8000);
       if (!onOwnProfile()) return { error: 'Не получилось открыть ваш профиль. Откройте его вручную и запустите снова.' };
@@ -602,7 +643,7 @@
     } catch (e) { saved = null; }
 
     if (saved && Date.now() - saved.t < 10 * 60 * 1000) {
-      waitFor(() => first(SEL.navProfile), 30000)
+      waitFor(() => first(SEL.navProfile) || ownHandle(), 30000)
         .then(() => start({ ...saved.cfg, _resume: saved }));
     }
 

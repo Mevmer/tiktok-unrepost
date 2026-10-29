@@ -8,6 +8,15 @@
 
 ---
 
+## 🆕 Что нового в v4.0.2
+
+- **Исправлено:** скрипт не узнавал ваш профиль, если в нике есть русские (не латинские) буквы или пробелы, и писал «Не получилось открыть ваш профиль». Теперь профиль определяется при любом нике.
+- Букмарклет обновлён до той же версии, что и скрипт для Tampermonkey.
+
+**Как обновиться:** Tampermonkey/Violentmonkey обновят скрипт сами (или «Проверить обновления» в расширении). Если пользуетесь букмарклетом — заново скопируйте его со страницы [bookmark-install.html](bookmark-install.html) и замените код в закладке.
+
+---
+
 ## 📱 Для мобильных телефонов
 
 **Используешь Android, iPhone, iPad?** 📲
@@ -117,6 +126,15 @@ TikTok иногда меняет вёрстку сайта. Скрипт ище�
 **TikTok Unrepost** removes **all of your TikTok reposts** in bulk, right in your browser: no passwords, no third-party services, no subscriptions.
 
 TikTok has no "remove all reposts" button, so you normally have to undo them one by one. This script does exactly that for you: it opens every video in your Reposts tab and clicks "Remove repost".
+
+---
+
+### 🆕 What's new in v4.0.2
+
+- **Fixed:** the script didn't recognize your profile if your username contains non-Latin letters (e.g. Cyrillic) or spaces, and stopped with "couldn't open your profile". Your profile is now detected with any username.
+- The bookmarklet is now built from the same version as the Tampermonkey script.
+
+**How to update:** Tampermonkey/Violentmonkey update the script automatically (or use "Check for updates"). Bookmarklet users: copy it again from [bookmark-install.html](bookmark-install.html) and replace the code in your bookmark.
 
 ---
 
